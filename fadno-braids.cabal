@@ -1,0 +1,27 @@
+name:                fadno-braids
+version:             0.0.0.1
+synopsis:            Braid representations in Haskell
+description:  Braids represented as Haskell types with support for generation and transformations.
+homepage:            http://github.com/slpopejoy/
+license:             BSD2
+license-file:        LICENSE
+author:              Stuart Popejoy
+maintainer:          spopejoy@panix.com
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  exposed-modules:
+                  Fadno.Braids
+                  Fadno.Braids.Internal
+                  Fadno.Braids.Graphics
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base >=4.8 && <4.9
+                     , containers
+                     , lens
+                     , diagrams
+                     , diagrams-lib
+                     , diagrams-rasterific
+  hs-source-dirs: src
+  default-language:    Haskell2010
