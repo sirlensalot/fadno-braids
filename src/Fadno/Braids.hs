@@ -234,8 +234,8 @@ makeTree mvs org = unfoldTree go (toMultiGen org,[]) where
     gen target path (mv,locs) = map (\l -> (applyMove mv l target,(mv,l):path)) locs
 
 
--- let t = makeTree reidemeister3 bands
--- let t = makeTree (reidemeister3 ++ map inverse reidmeister3) bands
+-- let t = makeTree reidemeister3 _bands
+-- let t = makeTree (reidemeister3 ++ map inverse reidemeister3) _bands
 -- renderBraids 100 [colorStrands] "allmoves.png" $ nub $ map (return.fst) $ flatten t
 
 zipTail :: (a -> a -> c) -> [a] -> [c]

@@ -46,11 +46,12 @@ renderBraids stepWidth drawFs fpath bs =
       maxWidth = maximum $ fmap stepCount (concat bs)
       drawB = frame 0.8 . (`drawBraid` drawFs)
 
-
+-- | Draw a braid with specified stepWidth and draw decorators.
 renderBraid :: Braid b a => Int -> [BraidDrawF a] -> FilePath -> b a -> IO ()
 renderBraid stepWidth drawFs fpath b =
     renderRast fpath (stepWidth * stepCount b) (bg white $ frame 0.4 $ drawBraid b drawFs)
 
+-- | Draw a strand with specified stepWidth, color, and draw decorators.
 renderStrand :: Integral a => Int -> [StrandDrawF a] -> FilePath -> Colour Double -> Strand a -> IO ()
 renderStrand sw drawFs fp color s@(Strand ss _l) =
     renderRast fp (sw * (length ss + 1))
@@ -93,6 +94,7 @@ warpPt x y y' k = p2 (fromIntegral x + k, fromIntegral y `delt` k)
 type BraidDrawF a = [Strand a] -> [Diagram B] -> [Diagram B]
 type StrandDrawF a = Strand a -> Diagram B -> Diagram B
 
+-- | Color a braid's strands separately.
 colorStrands :: BraidDrawF a
 colorStrands _ = zipWith lc colors
 
@@ -101,7 +103,7 @@ drawBraid b fs = mconcat $ runFs fs $ map (lwO 10 . drawStrand) ss
     where runFs = foldl1 (.) . map ($ ss)
           ss = strands b
 
-
+-- | Color a braid's loops, such that looped strands have the same color.
 colorLoops :: forall a . (Eq a,Show a) => BraidDrawF a
 colorLoops ss = zipWith bs ss
     where loops = toLoops ss
