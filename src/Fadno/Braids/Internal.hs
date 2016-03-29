@@ -288,9 +288,13 @@ strands b = map (`strand'` toGens b) [minIndex b..succ $ maxIndex b]
 
 -- | Capture strands into a loop, where '_sLast' of one strand
 -- is the first value of the next.
+-- Foldable instance ignores "last" values of strands (since they will equal the next head).
 newtype Loop a = Loop { _lStrands :: [Strand a] }
             deriving (Eq,Show,Monoid,Functor)
 makeLenses ''Loop
+
+instance Foldable Loop where
+    foldMap f = foldMap f . toListOf (lStrands.traverse.sSteps.traverse._1)
 
 
 

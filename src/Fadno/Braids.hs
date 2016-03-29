@@ -45,8 +45,8 @@ module Fadno.Braids
      ,find,find',merge,mergeAt,mergeAt',clear,clearMerge
     -- * Isotopy/Reidemeister moves
       ,reidemeister2,reidemeister3,findMoves,applyMove,moves,makeTree
-    -- * Builders
-     ,buildBraid,terraceBraid,bandGen
+    -- * Band generators
+     ,bandGen
     ,module Fadno.Braids.Graphics
     ) where
 import Control.Lens hiding (op,(#),Empty)
@@ -57,48 +57,6 @@ import Data.Tree
 
 
 
-
--- | Convert integral values to 'O's with linear interpolations of 'U's.
--- Builds 'MultiGen' to capture "flat" repeated values.
-buildBraid :: forall a . Integral a => [a] -> MultiGen a
-buildBraid as = MultiGen steps' where
-    steps' = foldl (interp O) [] (zipTail (,) as)
-    interp pol steps (val,next)
-           | abs delt > 1 = interp U newsteps (val + sig,next)
-           | otherwise = newsteps
-           where delt :: a
-                 delt = next - val
-                 sig = signum delt
-                 newsteps = steps ++ [newstep]
-                 newstep | sig == 1 = Step (Gen (val + 1) $ complement pol) []
-                         | sig == 0 = Empty
-                         | otherwise = Step (Gen val pol) []
-
--- | Elaborates a braid by introducing alternating gens at each step.
--- Gens propagate away from existing gens by 3s, intercalating a flat
--- strand. Flat (ie empty) steps are not elaborated.
-terraceBraid :: forall b a . (Integral a, Show a, Braid b a) => b a -> MultiGen a
-terraceBraid b = MultiGen . map terrace . toGens $ b
-    where
-      (minV,maxV) = (minIndex b,maxIndex b)
-      terrace :: [Gen a] -> Step a
-      terrace [] = Empty
-      terrace gl =
-          genFlips (last gl) (safesub 3) . --gen from highest down
-          genFlips (head gl) (safeadd 3) $  --gen from lowest up
-          gensToStep gl
-      safesub i a | minV + i > a = Nothing
-                  | otherwise = Just $ a - i
-      safeadd i a | a + i > maxV = Nothing
-                  | otherwise = Just $ a + i
-      -- recur to make new gens until out of bounds
-      genFlips :: Gen a -> (a -> Maybe a) ->
-                  Step a -> Step a
-      genFlips (Gen a pol) op s =
-          case op a of
-            Nothing -> s -- bounds exceeded, done
-            Just a' -> genFlips (Gen a' pol') op (insertWithS (flip const) (Gen a' pol') s)
-              where pol' = complement pol
 
 
 -- | Birman, Ko, Lee "band generators" (sigma-s-t)
@@ -147,9 +105,6 @@ merge = mergeAt 0 0
 _bands :: MultiGen Int
 _bands = mergeAt 5 5 (bandGen 0 4) (bandGen 0 9)
 
-
-_bigBraid :: MultiGen Int
-_bigBraid = (\b -> b `mappend` b) $ terraceBraid $ (\b -> merge b (invert b)) $ bandGen 0 10
 
 _testpath :: FilePath
 _testpath = "output/test.png"
