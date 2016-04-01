@@ -39,7 +39,7 @@ renderBraids :: Braid b a => Int -> [BraidDrawF a] -> FilePath -> [[b a]] -> IO 
 renderBraids stepWidth drawFs fpath bs =
     renderRast fpath
                (stepWidth * maxWidth * maxCols)
-               (bg white $ frame 0.2 $
+               (reflectY $ bg white $ frame 0.2 $
                 vcat $ map (hcat . map drawB) bs)
     where
       maxCols = maximum $ fmap length bs
@@ -49,13 +49,13 @@ renderBraids stepWidth drawFs fpath bs =
 -- | Draw a braid with specified stepWidth and draw decorators.
 renderBraid :: Braid b a => Int -> [BraidDrawF a] -> FilePath -> b a -> IO ()
 renderBraid stepWidth drawFs fpath b =
-    renderRast fpath (stepWidth * stepCount b) (bg white $ frame 0.4 $ drawBraid b drawFs)
+    renderRast fpath (stepWidth * stepCount b) (reflectY $ bg white $ frame 0.4 $ drawBraid b drawFs)
 
 -- | Draw a strand with specified stepWidth, color, and draw decorators.
 renderStrand :: Integral a => Int -> [StrandDrawF a] -> FilePath -> Colour Double -> Strand a -> IO ()
 renderStrand sw drawFs fp color s@(Strand ss _l) =
     renderRast fp (sw * (length ss + 1))
-                   (bg white $ frame 0.4 $
+                   (reflectY $ bg white $ frame 0.4 $
                     runFs drawFs $ lwO 5 $ lc color $
                     drawStrand s)
         where runFs = foldl1 (.) . map ($ s)
@@ -135,7 +135,7 @@ gridStrand s dia = (foldMap yl [0..fromIntegral yd] <>
           yl i = fromVertices [dp2 (0::Int,i), dp2 (xd,i)]
           xl i = fromVertices [dp2 (i,0::Int), dp2 (i,yd)]
           yd = maximum s - minimum s
-          xd = length (_sSteps s)
+          xd = length (_sWeaves s)
 
 dp2 :: (Integral a, Integral a1, Num n) => (a, a1) -> P2 n
 dp2 (a,b) = p2 (fromIntegral a, fromIntegral b)

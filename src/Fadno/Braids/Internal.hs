@@ -19,8 +19,9 @@ module Fadno.Braids.Internal
      ,MultiGen(..),Step(..),mSteps
     ,insertWithS,insertS,lookupS,deleteS,stepGens,stepToGens,gensToStep
     ,DimBraid(..),dim,dBraid,dSteps,dStrands
-     -- * Strands and loops
-    ,Strand(..),strand,strand',strands,sSteps,sLast
+     -- * Strands, loops, weaves
+    ,Weave,ToWeaves(..)
+    ,Strand(..),strand,strand',strands,sWeaves,sLast
     ,Loop(..),toLoops,lStrands
      -- * Moves/isotopy
     ,Move(..),inverse,moveH,moveW,Loc(..),lx,ly
@@ -250,12 +251,23 @@ instance (Integral a, Braid b a) => Braid (DimBraid b) a where
     maxIndex b = minIndex b + strandCount b - 2
     invert = over dBraid invert
 
+-- | Instruction to send the value "over" or "under" to the next value in
+-- a 'Strand' or 'Loop'. Newtyping is undesirable, want to keep Pair instances.
+type Weave a = (a,Polarity)
+
+-- | Extract a list of weaves.
+class ToWeaves w a where
+    toWeaves :: w -> [Weave a]
+instance ToWeaves [Weave a] a where
+    toWeaves = id
 
 -- | Concrete braid strand presentation as values delimited
 -- by polarities.
-data Strand a = Strand { _sSteps :: [(a,Polarity)], _sLast :: a }
+data Strand a = Strand { _sWeaves :: [Weave a], _sLast :: a }
               deriving (Eq,Show)
 makeLenses ''Strand
+instance ToWeaves (Strand a) a where
+    toWeaves = _sWeaves
 instance Functor Strand where
     fmap f (Strand ss l) = Strand (map (first f) ss) (f l)
 instance Foldable Strand where
@@ -294,7 +306,10 @@ newtype Loop a = Loop { _lStrands :: [Strand a] }
 makeLenses ''Loop
 
 instance Foldable Loop where
-    foldMap f = foldMap f . toListOf (lStrands.traverse.sSteps.traverse._1)
+    foldMap f = foldMap f . toListOf (lStrands.traverse.sWeaves.traverse._1)
+instance ToWeaves (Loop a) a where
+    toWeaves = toListOf (lStrands.traverse.sWeaves.traverse)
+
 
 
 
@@ -302,7 +317,7 @@ instance Foldable Loop where
 toLoops :: (Eq a,Show a) => [Strand a] -> [Loop a]
 toLoops [] = []
 toLoops sa = recurL [] sa where
-    shead = fst . head . _sSteps
+    shead = fst . head . _sWeaves
     findTail s = (==shead (head s)) . _sLast
     recurL ls [] = ls
     recurL ls (a:as) = recurS [a] as
