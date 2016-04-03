@@ -316,7 +316,9 @@ instance ToWeaves (Loop a) a where
 -- | Find loops in strands.
 toLoops :: (Eq a,Show a) => [Strand a] -> [Loop a]
 toLoops [] = []
-toLoops sa = recurL [] sa where
+toLoops sa = reverse $
+             over (traverse.lStrands) (\s -> last s:init s) $
+             recurL [] sa where
     shead = fst . head . _sWeaves
     findTail s = (==shead (head s)) . _sLast
     recurL ls [] = ls
