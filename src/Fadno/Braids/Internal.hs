@@ -42,6 +42,7 @@ power :: Integral a => Polarity -> a
 power O = 1
 power U = -1
 
+-- | Flip polarity.
 complement :: Polarity -> Polarity
 complement O = U
 complement U = O
@@ -72,9 +73,9 @@ makeLenses ''Artin
 data Step a =
     Empty |
     Step {
-      -- ^ Absolute-indexed "top" generator
+      -- | Absolute-indexed "top" generator
       _sHead :: Gen a
-      -- ^ (offset + 2)-indexed tail generators.
+      -- | (offset + 2)-indexed tail generators.
     , _sOffsets :: [Gen Natural]
     } deriving (Eq)
 makeLenses ''Step
@@ -184,6 +185,7 @@ instance (Monoid (b a), Integral a) => Monoid (DimBraid b a) where
         DimBraid (b1 `mappend` b2) (max x1 x2) (y1 + y2)
 makeLenses ''DimBraid
 
+-- | Make 'DimBraid' using braid's dimensions.
 dim :: (Braid b a) => b a -> DimBraid b a
 dim b = DimBraid b (stepCount b) (strandCount b)
 
@@ -349,7 +351,7 @@ moveH (Move m1 m2) = max (strandCount m1) $ strandCount m2
 moveW :: Braid a i => Move a i -> Int
 moveW (Move m1 m2) = max (stepCount m1) $ stepCount m2
 
--- Coordinate in braid.
+-- | Coordinate in braid.
 data Loc a = Loc { _lx :: Int, _ly :: a } deriving (Eq,Show,Ord)
 makeLenses ''Loc
 instance Field1 (Loc a) (Loc a) Int Int where

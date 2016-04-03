@@ -10,43 +10,61 @@
 --
 -- = Braid Typeclass
 --
--- `Braid b a` is a typeclass over the braid rep itself and its value type. Since a goal of this library is to use braids for non-mathematical purposes (ie music composition), a Braid can be indexed over any `Integral` type, to support braids representing pitch values in a register for instance.
+-- `Braid` is a typeclass over the braid rep itself and its value type. Since a goal of this library is to use braids for non-mathematical purposes (ie music composition), a Braid can be indexed over any `Integral` type, to support braids representing pitch values in a register for instance.
 --
 -- = Generators
 --
 -- All braids are represented using Artin generators as `Gen`, with `Polarity` defining the "power" of a generator as `O`ver or `U`nder.
 --
--- Generator indexes differ from the literature in that they are generally *0-indexed* whereas Artin generators are 1-indexed. However, again these braids can represent other ranges of numbers as branch indexes.
+-- Generator indexes are usually 0-indexed, which differs from the 1-indexed generators in the literature. However, again these braids can represent other ranges of numbers as branch indexes.
 --
 -- = Braid instances
 --
 -- `Artin` creates canonical, "one-at-a-time", generator braids.
 --
--- `MultiGen` creates "compressed", "many-at-a-time" braids.
+-- @
+-- Artin [Gen 0 O,Gen 1 U]
+-- @
+--
+-- `MultiGen` creates "compressed", "many-at-a-time" braids of `Step`s, which
+-- prevent invalid adjacent generators.
+--
+-- @
+-- MultiGen [Step (Gen 1 U) [Gen 0 U],Step (Gen 1 O) []]
+-- @
 --
 -- `DimBraid` is for creating "padded" braids, since generators cannot express the absence of a cross.
 --
--- = Braid builders
+-- = Birman\/Ko\/Lee generators.
 --
--- `bandGen` creates Birman/Ko/Lee-style band generators. In addition, stylized braid builders like `buildBraid` and `terraceBraid` are offered.
+-- `bandGen` creates Birman\/Ko\/Lee-style band generators.
 --
--- = Transformations/Moves
+-- = Transformations\/Moves
 --
 -- In addition to operations like `merge` etc, the type `Move` represents Reidemeister-type isotopy moves. `makeTree` unfolds a potentially-infinite tree representing all possible applications of a move.
 --
 -- = Graphics
 --
--- `drawBraid` and `drawStrands` allow drawings of braids, admitting extra functions for colorizing etc.
+-- `renderBraid`, `renderBraids` and `renderStrand` allow drawings of braids, admitting extra functions for colorizing etc.
+--
+-- @
+-- renderBraid 60 [colorStrands] "braid.png" $ bandGen 0 5
+-- @
+--
+-- <<http://i.imgur.com/JsK2D1p.png>>
+--
 --
 module Fadno.Braids
     (
+    -- * Braid Types
      module Fadno.Braids.Internal
-    -- * Braid find/merge/clear
+    -- * Braid find\/merge\/clear
      ,find,find',merge,mergeAt,mergeAt',clear,clearMerge
-    -- * Isotopy/Reidemeister moves
+    -- * Isotopy\/Reidemeister moves
       ,reidemeister2,reidemeister3,findMoves,applyMove,moves,makeTree
     -- * Band generators
      ,bandGen
+    -- * Braid Graphics
     ,module Fadno.Braids.Graphics
     ) where
 import Control.Lens hiding (op,(#),Empty)
@@ -159,7 +177,7 @@ find' ba w h bb = [ Loc x y | x <- [0 .. stepCount bb] ,
           gbb = toGens bb
           test x y = gbb == toGens (clearMerge gba x y w h gbb)
 
--- clear generators and merge. TODO: doesn't clear adjacent gens.
+-- | clear generators and merge. TODO: doesn't clear adjacent gens.
 clearMerge :: Integral a =>
      [[Gen a]] -> Int -> a -> Int -> a -> [[Gen a]] -> MultiGen a
 clearMerge ba x y w h = mergeAt' x y ba . clear x y w h

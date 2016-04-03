@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+-- | Diagrams for braids.
 module Fadno.Braids.Graphics
     (
      renderBraid, BraidDrawF,
@@ -35,6 +36,7 @@ _testRenderS = renderStrand 40 [] _testpath crimson _aStrand
 _testRendRast :: Diagram B -> IO ()
 _testRendRast = renderRast _testpath 1000
 
+-- | Draw rows and columns of braids with specified stepWidth and draw decorators.
 renderBraids :: Braid b a => Int -> [BraidDrawF a] -> FilePath -> [[b a]] -> IO ()
 renderBraids stepWidth drawFs fpath bs =
     renderRast fpath
@@ -91,7 +93,9 @@ warpPt x y y' k = p2 (fromIntegral x + k, fromIntegral y `delt` k)
                | otherwise = const
 
 
+-- | A function to affect strand presentation in a braid.
 type BraidDrawF a = [Strand a] -> [Diagram B] -> [Diagram B]
+-- | A function to affect strand presentation in a single-strand image.
 type StrandDrawF a = Strand a -> Diagram B -> Diagram B
 
 -- | Color a braid's strands separately.
@@ -127,6 +131,7 @@ labelStrand (Strand _ idx) dia = foldl f dia (zip idx [(0 :: Int)..])
                       moveTo (p2 (-0.3,fromIntegral i))
 -}
 
+-- | Draw a grid behind a single strand.
 gridStrand :: Integral a => StrandDrawF a
 gridStrand s dia = (foldMap yl [0..fromIntegral yd] <>
                                  foldMap xl [0..xd])
