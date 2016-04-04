@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -193,28 +194,28 @@ dim b = DimBraid b (stepCount b) (strandCount b)
 
 
 -- | Braid representations.
-class (Integral b, Monoid (a b)) => Braid (a :: * -> *) b where
+class (Integral a, Monoid (br a)) => Braid br a where
 
     {-# MINIMAL toGens,minIndex,maxIndex,invert #-}
 
     -- | "Length", number of "steps"/columns/artin generators.
-    stepCount :: a b -> Int
+    stepCount :: br a -> Int
     -- | "N", braid group index, number of strands/rows/"i"s.
-    strandCount :: a b -> b
-    -- | Common format is a series of "steps" of absolute-indexed generators.
-    toGens :: a b -> [[Gen b]]
+    strandCount :: br a -> a
+    -- | Common format is br series of "steps" of absolute-indexed generators.
+    toGens :: br a -> [[Gen a]]
     -- | Minimum index (i) value
-    minIndex :: a b -> b
+    minIndex :: br a -> a
     -- | Maximum index (i) value. Note this means values of (i+1) obtain, per generators.
-    maxIndex :: a b -> b
+    maxIndex :: br a -> a
     -- | Invert indices
-    invert :: a b -> a b
+    invert :: br a -> br a
     -- | convert to single-gen
-    toArtin :: a b -> Artin b
+    toArtin :: br a -> Artin a
     -- | convert to multi-gen
-    toMultiGen :: a b -> MultiGen b
+    toMultiGen :: br a -> MultiGen a
 
-    strandCount a = (maxIndex a + 2) - minIndex a
+    strandCount br = (maxIndex br + 2) - minIndex br
 
     stepCount = length . toGens -- inefficient
 
@@ -225,7 +226,7 @@ class (Integral b, Monoid (a b)) => Braid (a :: * -> *) b where
 
 
 
-instance Integral a => Braid (Artin) a where
+instance Integral a => Braid Artin a where
     toGens = map return . _aGens
     stepCount = length . _aGens
     minIndex (Artin []) = 0
@@ -235,7 +236,7 @@ instance Integral a => Braid (Artin) a where
     invert b = over (aGens.traverse.gPos) (maxIndex b -) b
     toArtin = id
 
-instance Integral a => Braid (MultiGen) a where
+instance Integral a => Braid MultiGen a where
     toGens = map stepToGens . _mSteps
     stepCount = length . _mSteps
     minIndex = minimum . map _gPos . concat . toGens
