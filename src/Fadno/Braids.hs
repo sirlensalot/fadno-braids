@@ -71,6 +71,7 @@ import Control.Lens hiding (op,(#),Empty)
 import Fadno.Braids.Internal
 import Fadno.Braids.Graphics
 import Data.Tree
+import Data.Default
 
 
 
@@ -130,8 +131,8 @@ _testpath = "output/test.png"
 -- renderBraid :: Braid b a => Int -> [BraidDrawF a] -> FilePath -> b a -> IO ()
 
 _drawLoops,_drawStrands :: (Show a, Integral a, Braid b a) => b a -> IO ()
-_drawLoops = renderBraid 400 [colorLoops] _testpath
-_drawStrands = renderBraid 400 [colorStrands] _testpath
+_drawLoops = renderBraid def { stepWidth = 400 } [colorLoops] _testpath
+_drawStrands = renderBraid def { stepWidth = 400 } [colorStrands] _testpath
 
 
 
@@ -150,13 +151,13 @@ reidemeister3 = [ mk (zipWith Gen is ps) | ps <- [[U,U,O],[O,O,U]], is <- [[0,1,
                                   (\i -> if i == 0 then 1 else 0) (reverse gs)
 
 _drawReid3s :: IO ()
-_drawReid3s = renderBraids 80 [colorStrands] "output/reid3.png" $
+_drawReid3s = renderBraids def { stepWidth = 80 } [colorStrands] "output/reid3.png" $
              map (\(Move a b) -> [a,b]) (reidemeister3 :: [Move Artin Int])
 
 
 -- drawMove (last reidemeister3) bands
 _drawMove :: (Integral i, Braid a i, Braid b i) => Move a i -> b i -> IO ()
-_drawMove m b = renderBraids 80 [colorStrands] "output/move.png"
+_drawMove m b = renderBraids def { stepWidth = 80 } [colorStrands] "output/move.png"
                [toMultiGen b:map toMultiGen [view _1 m, view _2 m],
                 --[toMultiGen b],
                 map (\l -> applyMove m l b) (findMoves m b)]
