@@ -10,9 +10,11 @@ author:              Stuart Popejoy
 maintainer:          spopejoy@panix.com
 build-type:          Simple
 cabal-version:       >=1.10
+Tested-with: GHC == 7.10.3, GHC == 8.0.1
 source-repository head
   type:     git
   location: https://github.com/slpopejoy/fadno-braids.git
+
 
 library
   exposed-modules:
