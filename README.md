@@ -1,5 +1,9 @@
 # fando-braids: Braid representations in Haskell
 
+[![Hackage](https://img.shields.io/hackage/v/fadno-braids.svg)](https://hackage.haskell.org/package/fadno-braids)
+[![Build Status](https://travis-ci.org/slpopejoy/fadno-braids.svg?branch=master)](https://travis-ci.org/slpopejoy/fadno-braids)
+
+
 Braids represented as Haskell types with support for generation and transformations.
 
 # Braid Typeclass
