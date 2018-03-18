@@ -1,6 +1,6 @@
 name:                fadno-braids
 category:            Data, Math, Algebra
-version:             0.1.0
+version:             0.1.1
 synopsis:            Braid representations in Haskell
 description:  Braids represented as Haskell types with support for generation and transformations.
 homepage:            http://github.com/slpopejoy/
@@ -22,13 +22,13 @@ library
                   Fadno.Braids.Graphics
   -- other-modules:
   -- other-extensions:
-  build-depends:       base == 4.9.*
-                     , containers == 0.5.*
-                     , data-default == 0.7.*
-                     , diagrams == 1.4.*
-                     , diagrams-lib == 1.4.*
-                     , diagrams-rasterific == 1.4.*
-                     , lens == 4.15.*
-                     , random == 1.1.*
+  build-depends:       base >= 4.9 && < 4.11
+                     , containers >= 0.5 && < 0.6
+                     , data-default >= 0.7 && < 0.8
+                     , diagrams >= 1.4 && < 1.5
+                     , diagrams-lib >= 1.4 && < 1.5
+                     , diagrams-rasterific >= 1.4 && < 1.5
+                     , lens >= 4.15 && < 4.17
+                     , random >= 1.1 && < 1.2
   hs-source-dirs: src
   default-language:    Haskell2010
