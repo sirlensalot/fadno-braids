@@ -61,7 +61,7 @@ makeLenses ''Gen
 
 -- | Braid as "Artin generators" (one-at-a-time).
 newtype Artin a = Artin { _aGens :: [Gen a] }
-    deriving (Eq,Show,Monoid,Functor)
+    deriving (Eq,Show,Semigroup,Monoid,Functor)
 instance Foldable Artin where
     foldMap f = foldMap f . map _gPos . _aGens
 makeLenses ''Artin
@@ -159,18 +159,19 @@ instance Integral a => Ixed (Step a) where
      Just v  -> f v <&> \v' -> insertS (Gen k v') m
      Nothing -> pure m
   {-# INLINE ix #-}
+instance Integral a => Semigroup (Step a) where
+    a <> b = foldl ins a (stepToGens b)
+        where ins s g = insertWithS (flip const) g s
 
 instance Integral a => Monoid (Step a) where
     mempty = Empty
-    a `mappend` b = foldl ins a (stepToGens b)
-        where ins s g = insertWithS (flip const) g s
 
 
 
 
 -- | Steps of many-at-a-time generators.
 newtype MultiGen a = MultiGen { _mSteps :: [Step a] }
-    deriving (Eq,Monoid)
+    deriving (Eq,Semigroup,Monoid)
 instance (Show a) => Show (MultiGen a) where show (MultiGen s) = "MultiGen " ++ show s
 makeLenses ''MultiGen
 
@@ -179,10 +180,11 @@ makeLenses ''MultiGen
 data DimBraid b a =
     DimBraid { _dBraid :: b a, _dSteps :: Int, _dStrands :: a }
     deriving (Eq,Show)
+instance (Semigroup (b a), Integral a) => Semigroup (DimBraid b a) where
+  (DimBraid b1 x1 y1) <> (DimBraid b2 x2 y2) =
+        DimBraid (b1 <> b2) (max x1 x2) (y1 + y2)
 instance (Monoid (b a), Integral a) => Monoid (DimBraid b a) where
     mempty = DimBraid mempty 0 0
-    (DimBraid b1 x1 y1) `mappend` (DimBraid b2 x2 y2) =
-        DimBraid (b1 `mappend` b2) (max x1 x2) (y1 + y2)
 makeLenses ''DimBraid
 
 -- | Make 'DimBraid' using braid's dimensions.
@@ -304,7 +306,7 @@ strands b = map (`strand'` toGens b) [minIndex b..succ $ maxIndex b]
 -- is the first value of the next.
 -- Foldable instance ignores "last" values of strands (since they will equal the next head).
 newtype Loop a = Loop { _lStrands :: [Strand a] }
-            deriving (Eq,Show,Monoid,Functor)
+            deriving (Eq,Show,Semigroup,Monoid,Functor)
 makeLenses ''Loop
 
 instance Foldable Loop where
