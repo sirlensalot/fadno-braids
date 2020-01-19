@@ -30,6 +30,7 @@ module Fadno.Braids.Internal
 import Control.Lens hiding (Empty)
 import Numeric.Natural
 import Control.Arrow
+import Data.Semigroup
 
 -- | Braid generator "power", as (i + 1) "over/under" i.
 -- O[ver] == power 1 (i + 1 "over" i)
@@ -165,6 +166,7 @@ instance Integral a => Semigroup (Step a) where
 
 instance Integral a => Monoid (Step a) where
     mempty = Empty
+    mappend = (<>)
 
 
 
@@ -183,8 +185,9 @@ data DimBraid b a =
 instance (Semigroup (b a), Integral a) => Semigroup (DimBraid b a) where
   (DimBraid b1 x1 y1) <> (DimBraid b2 x2 y2) =
         DimBraid (b1 <> b2) (max x1 x2) (y1 + y2)
-instance (Monoid (b a), Integral a) => Monoid (DimBraid b a) where
+instance (Monoid (b a), Semigroup (b a), Integral a) => Monoid (DimBraid b a) where
     mempty = DimBraid mempty 0 0
+    mappend = (<>)
 makeLenses ''DimBraid
 
 -- | Make 'DimBraid' using braid's dimensions.
@@ -195,7 +198,7 @@ dim b = DimBraid b (stepCount b) (strandCount b)
 
 
 -- | Braid representations.
-class (Integral a, Monoid (br a)) => Braid br a where
+class (Integral a, Monoid (br a), Semigroup (br a)) => Braid br a where
 
     {-# MINIMAL toGens,minIndex,maxIndex,invert #-}
 

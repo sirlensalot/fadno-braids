@@ -1,6 +1,6 @@
 name:                fadno-braids
 category:            Data, Math, Algebra
-version:             0.1.2
+version:             0.1.3
 synopsis:            Braid representations in Haskell
 description:  Braids represented as Haskell types with support for generation and transformations.
 homepage:            http://github.com/slpopejoy/
