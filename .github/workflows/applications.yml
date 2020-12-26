@@ -1,0 +1,66 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+jobs:
+
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ghc: ['8.6.5', '8.8.4', '8.10.2']
+        cabal: ['3.2.0.0']
+        os: ['ubuntu-20.04']
+
+    steps:
+
+    # Setup
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Install GHC and Cabal
+      uses: actions/setup-haskell@v1
+      with:
+         ghc-version: ${{ matrix.ghc }}
+         cabal-version: ${{ matrix.cabal }}
+    - name: Configure project
+      run: |
+        cat > cabal.project.local <<EOF
+        package fadno-braids
+          documentation: True
+          benchmarks: True
+          tests: True
+        EOF
+
+    # Restore Packages from Caches
+    - uses: actions/cache@v2
+      name: cache cabal store
+      with:
+        path: |
+          ~/.cabal/packages
+          ~/.cabal/store
+          ./dist-newstyle
+        key: ${{ matrix.os }}-${{ matrix.ghc }}
+        restore-keys: |
+
+    # Build
+    - name: Update package database
+      run: cabal v2-update
+    - name: Configure build
+      run: |
+        cabal v2-build all --dry-run
+        cabal v2-freeze
+    - name: Install build dependencies
+      run: cabal v2-build --only-dependencies
+    - name: Build library
+      run: cabal v2-build
+
+    # Tests
+    - name: Run Tests
+      run: cabal v2-test
